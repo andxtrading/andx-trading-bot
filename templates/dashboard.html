@@ -333,7 +333,6 @@
 
   <div class="card guide">
     <h2>Settings explained</h2>
-    <div class="g-row"><b>Add name</b><span>Tags your bot for the competition.</span></div>
     <div class="g-row"><b>Trading mode</b><span><b>Paper</b> = practice money (safe, start here). <b>Live</b> = real money with your own keys.</span></div>
     <div class="g-row"><b>Strategy</b><span>The playbook. <b>Auto</b> picks trend-following or mean-reversion based on the market; the others force one style.</span></div>
     <div class="g-row"><b>Symbols</b><span>Which coins to trade. <b>ALL</b> = every ANDX pair, or list your own.</span></div>
@@ -398,9 +397,8 @@
   <div>
     <div class="card">
       <h2>Bot settings</h2>
-      <label for="studentId">Add name <span style="color:var(--muted)">(competition tag)</span></label>
-      <input id="studentId" type="text" autocomplete="off" placeholder="your name">
-      <div class="hint">Everyone starts from the same bot — you compete by <b>editing the strategy</b> (the <b>Edit Strategy</b> tab, or <code>strategies.py</code>). This tag just labels your entry.</div>
+      <input id="studentId" type="hidden">
+      <div class="hint">Everyone starts from the same bot — you compete by <b>editing the strategy</b> (the <b>Edit Strategy</b> tab, or <code>strategies.py</code>).</div>
       <label for="mode">Trading mode</label>
       <select id="mode">
         <option value="paper">Paper (simulated — no keys needed)</option>
