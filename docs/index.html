@@ -20,8 +20,8 @@
   .wrap{position:relative;z-index:2}
 
   /* ---------- welcome screen ---------- */
-  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;text-align:center;padding:40px 20px}
+  .hero{min-height:auto;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:64px 20px 28px}
   .brand{display:flex;align-items:center;gap:11px;margin-bottom:34px}
   .brand .mark{width:38px;height:38px;border-radius:10px;
     background:linear-gradient(135deg,var(--accent),#9cc3ff);
@@ -45,8 +45,7 @@
   .scrollhint{margin-top:26px;font-size:12.5px;color:var(--muted);letter-spacing:.04em}
 
   /* ---------- bot section (revealed on Enter) ---------- */
-  #enter{max-width:680px;margin:0 auto;padding:20px 20px 80px;opacity:0;
-    transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  #enter{max-width:680px;margin:0 auto;padding:20px 20px 80px}
   #enter.show{opacity:1;transform:none}
   .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent2);
     font-weight:700;margin-bottom:8px}
@@ -88,10 +87,6 @@
     <div class="eyebrow">Fall 2026 · Presented by ANDX</div>
     <h1>The ANDX <span class="g">Quant Trading</span> Competition</h1>
     <p class="tag">A trading bot provided for students by ANDX. It's a base-level bot to start from — you're encouraged to move the settings around and edit the strategies to make it your own.</p>
-    <button class="cta" id="enterBtn">
-      Enter the competition
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
     <div class="scrollhint">Free to enter · runs on your computer · starts in risk-free practice mode</div>
     <a href="tutorial.html" style="margin-top:22px;display:inline-block;color:var(--accent2);font-size:14px;text-decoration:none;border-bottom:1px solid rgba(111,168,255,.35);padding-bottom:2px">New here? Read the full step-by-step tutorial →</a>
   </header>
@@ -132,14 +127,6 @@
 </div>
 
 <script>
-  // reveal the bot section when they "enter"
-  var enterBtn = document.getElementById('enterBtn');
-  var enter = document.getElementById('enter');
-  enterBtn.addEventListener('click', function(){
-    enter.classList.add('show');
-    enter.scrollIntoView({behavior:'smooth', block:'start'});
-  });
-
   // ambient background: faint drifting equity-curve lines (on-theme, subtle)
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduce) {
