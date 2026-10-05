@@ -135,7 +135,7 @@ class BotEngine:
                     # so paper results don't flatter what live would do
                     fee_side = float(cfg.get("fee_pct_per_side",
                                              1.0 if (cfg["exchange"] == "andx"
-                                                     and not cfg.get("derivatives", True))
+                                                     and not cfg.get("derivatives", False))
                                              else 0.25)) / 100.0
                     self.broker = PaperBroker(float(cfg.get("paper_balance", 10000)),
                                               taker_fee=fee_side)
@@ -144,9 +144,17 @@ class BotEngine:
                     if not creds or not creds.get("api_key"):
                         return False, f"no API keys saved for {cfg['exchange']} — add them in Settings"
                     if is_andx:
-                        if cfg.get("derivatives", True):
+                        if cfg.get("derivatives", False):
                             lev = int(float(cfg.get("risk", {}).get("max_leverage", 2) or 2))
-                            self.broker = AndxMarginBroker(creds, leverage=lev)
+                            try:
+                                self.broker = AndxMarginBroker(creds, leverage=lev)
+                            except Exception as de:
+                                if "derivative" in str(de).lower() or "limit group" in str(de).lower():
+                                    self.log("Your ANDX account is not enabled for derivatives - running in spot mode instead.", "warn")
+                                    cfg = dict(cfg); cfg["derivatives"] = False
+                                    self.broker = AndxBroker(creds)
+                                else:
+                                    raise
                         else:
                             self.broker = AndxBroker(creds)
                     else:
@@ -155,7 +163,7 @@ class BotEngine:
                 return False, f"startup failed: {e}"
 
             # Derivatives trade long AND short; spot trades long/flat.
-            derivatives = cfg.get("derivatives", True)
+            derivatives = cfg.get("derivatives", False)
             self.spot_only = is_andx and not derivatives
             if is_andx and derivatives:
                 self.log("ANDX derivatives mode — trading long AND short with "
