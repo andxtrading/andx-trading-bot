@@ -49,7 +49,7 @@ DEFAULT_CONFIG = {
     "paper_balance": 10000,
     "poll_seconds": 60,
     "slow_mode": False,           # conservative profit-focused profile
-    "derivatives": True,          # trade ANDX margin instruments (longs+shorts)
+    "derivatives": False,          # trade ANDX margin instruments (longs+shorts)
     "volume_target_usd": 0,
     "volume_target_since": 0,
     "rotate_minutes": 15,
