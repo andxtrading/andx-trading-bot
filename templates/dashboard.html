@@ -669,9 +669,9 @@ function fillForms() {
   $("mode").value = cfg.mode;
   $("studentId").value = cfg.student_id || "";
   $("slowToggle").checked = !!cfg.slow_mode;
-  $("derivToggle").checked = cfg.derivatives !== false;
+  $("derivToggle").checked = cfg.derivatives === true;
   syncSwitchStates();
-  $("exchangeNote").innerHTML = cfg.derivatives !== false
+  $("exchangeNote").innerHTML = cfg.derivatives === true
     ? 'The bot trades <b>ANDX derivatives</b> — real longs <b>and shorts</b> with leverage (set by the "Max leverage" risk field), stops enforced by the exchange. Only the API key and secret are needed.'
     : 'The bot trades <b>ANDX spot</b> — long/flat: it buys coins on long signals and sells back to USDT on exits. Flip the ⚡ Derivatives switch for real shorts with leverage.';
   $("symbols").value = cfg.symbols.join(", ");
