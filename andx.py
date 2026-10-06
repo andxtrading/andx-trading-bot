@@ -56,16 +56,29 @@ class AndxClient:
         headers = {"content-type": "application/json"}
         if auth:
             headers["Authorization"] = f"Bearer {self._token()}"
-        resp = requests.post(url, json={"query": query, "variables": variables or {}},
-                             headers=headers, timeout=TIMEOUT)
-        try:
-            data = resp.json()
-        except ValueError:
-            raise AndxError(f"HTTP {resp.status_code}: {resp.text[:200]}")
-        if data.get("errors"):
-            msg = "; ".join(e.get("message", "?") for e in data["errors"])
-            raise AndxError(msg[:300])
-        return data["data"]
+        body = {"query": query, "variables": variables or {}}
+        # ANDX rate-limits bursts of requests. Derivatives startup fires a big
+        # burst (margin broker + a second client for the spot guard + universe
+        # ranking) that can trip it, while lighter spot startup slips under.
+        # Back off and retry on "too many requests" so a transient limit does
+        # not kill the whole start — for us and for students, in any mode.
+        delays = (1, 2, 4, 8, 12)
+        for i in range(len(delays) + 1):
+            resp = requests.post(url, json=body, headers=headers, timeout=TIMEOUT)
+            try:
+                data = resp.json()
+            except ValueError:
+                if resp.status_code == 429 and i < len(delays):
+                    time.sleep(delays[i]); continue
+                raise AndxError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+            if data.get("errors"):
+                msg = "; ".join(e.get("message", "?") for e in data["errors"])
+                if i < len(delays) and ("too many request" in msg.lower()
+                                        or "rate limit" in msg.lower()):
+                    time.sleep(delays[i]); continue
+                raise AndxError(msg[:300])
+            return data["data"]
+        raise AndxError("too many requests: still rate limited after retries")
 
     def _token(self) -> str:
         if self._jwt and time.time() < self._jwt_expiry - 60:
