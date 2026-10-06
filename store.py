@@ -53,6 +53,7 @@ DEFAULT_CONFIG = {
     "volume_target_usd": 0,
     "volume_target_since": 0,
     "rotate_minutes": 15,
+    "fee_pct_per_side": 0,   # fees are off for the competition
     "risk": {
         "risk_per_trade_pct": 1.0,
         "atr_stop_mult": 2.5,
