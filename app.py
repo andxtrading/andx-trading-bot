@@ -220,6 +220,8 @@ def start():
             return jsonify({"ok": False, "detail": "live mode requires confirmation",
                             "needs_confirmation": True}), 400
     ok, detail = ENGINE.start()
+    if ok:
+        store.save_run_state(True, live_confirmed=(cfg["mode"] == "live"))
     return jsonify({"ok": ok, "detail": detail}), (200 if ok else 400)
 
 
@@ -227,6 +229,7 @@ def start():
 def stop():
     flatten = (request.get_json(silent=True) or {}).get("flatten", False)
     ENGINE.stop(flatten=flatten)
+    store.save_run_state(False)
     return jsonify({"ok": True})
 
 
@@ -412,6 +415,40 @@ def close_position():
         return jsonify({"ok": False, "detail": str(e)}), 400
 
 
+def _auto_resume_paper():
+    """After a restart, resume PAPER trading by itself if the user had it
+    running — so students don't have to re-click Start every reboot. Live is
+    never auto-started here: real money always needs an explicit Start with
+    confirmation. Runs a few seconds after boot and never blocks the dashboard
+    from loading."""
+    import threading
+
+    def _go():
+        time.sleep(8)
+        try:
+            rs = store.load_run_state()
+            if ENGINE.running or not rs.get("running"):
+                return
+            if store.load_config().get("mode", "paper") != "paper":
+                return
+            ok, detail = ENGINE.start()
+            if ok:
+                ENGINE.log("auto-resumed paper trading after restart")
+            else:
+                ENGINE.log(f"auto-resume skipped: {detail}", "warn")
+        except Exception as e:
+            try:
+                ENGINE.log(f"auto-resume error: {e}", "warn")
+            except Exception:
+                pass
+
+    threading.Thread(target=_go, daemon=True).start()
+
+
 if __name__ == "__main__":
     print("\n  ANDX Trading Bot — dashboard: http://127.0.0.1:8300\n")
+    try:
+        _auto_resume_paper()
+    except Exception:
+        pass
     app.run(host="127.0.0.1", port=8300, debug=False)
