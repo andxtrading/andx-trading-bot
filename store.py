@@ -15,6 +15,7 @@ DB_PATH = os.path.join(BASE_DIR, "bot.db")
 POSITIONS_PATH = os.path.join(BASE_DIR, "positions.json")
 DAY_STATE_PATH = os.path.join(BASE_DIR, "day_state.json")
 MEMORY_PATH = os.path.join(BASE_DIR, "memory.json")
+RUN_STATE_PATH = os.path.join(BASE_DIR, "run_state.json")
 
 
 def _atomic_write_json(path: str, payload, mode: int | None = None):
@@ -85,6 +86,30 @@ def load_config() -> dict:
 def save_config(cfg: dict):
     with _lock:
         _atomic_write_json(CONFIG_PATH, cfg)
+
+
+# --------------------------------------------------------------- run state
+
+def load_run_state() -> dict:
+    """Did the user have the bot running (so a reboot can resume trading, not
+    just the dashboard), and have they confirmed live trading at least once."""
+    try:
+        with open(RUN_STATE_PATH) as f:
+            d = json.load(f)
+        return {"running": bool(d.get("running")),
+                "live_confirmed": bool(d.get("live_confirmed"))}
+    except Exception:
+        return {"running": False, "live_confirmed": False}
+
+
+def save_run_state(running: bool, live_confirmed: bool | None = None):
+    """Persist run intent. live_confirmed=None keeps the stored value."""
+    if live_confirmed is None:
+        live_confirmed = load_run_state()["live_confirmed"]
+    with _lock:
+        _atomic_write_json(RUN_STATE_PATH,
+                           {"running": bool(running),
+                            "live_confirmed": bool(live_confirmed)})
 
 
 # ------------------------------------------------------------------ secrets
