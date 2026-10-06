@@ -133,10 +133,7 @@ class BotEngine:
                 if mode == "paper":
                     # sim charges the same per-side fee the entry gate assumes,
                     # so paper results don't flatter what live would do
-                    fee_side = float(cfg.get("fee_pct_per_side",
-                                             1.0 if (cfg["exchange"] == "andx"
-                                                     and not cfg.get("derivatives", False))
-                                             else 0.25)) / 100.0
+                    fee_side = float(cfg.get("fee_pct_per_side", 0.0)) / 100.0
                     self.broker = PaperBroker(float(cfg.get("paper_balance", 10000)),
                                               taker_fee=fee_side)
                 else:
@@ -1830,8 +1827,7 @@ class BotEngine:
             return f"spread {spread * 100:.1f}%"
         # 4) fee-aware minimum edge: the initial stop distance must clear the
         #    round-trip cost with real room, or the trade is a fee donation
-        fee_side = float(cfg.get("fee_pct_per_side",
-                                 1.0 if self.spot_only else 0.25)) / 100.0
+        fee_side = float(cfg.get("fee_pct_per_side", 0.0)) / 100.0
         round_trip = 2 * fee_side + spread
         if risk_cfg.atr_stop_mult * atr_val < 1.5 * round_trip * price:
             return "expected move below round-trip fees"
